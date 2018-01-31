@@ -2,6 +2,7 @@
 using System.Linq;
 using Moq;
 using TestsRefactoring.Library.TestSmell;
+using TestsRefactoring.Tests.Builders;
 using Xunit;
 
 namespace TestsRefactoring.Tests.Testsmell
@@ -9,47 +10,7 @@ namespace TestsRefactoring.Tests.Testsmell
     public class CurrentClaimsFilterTests
     {
         
-        // Current claim: created and not be deleted for another claim created after it, and its date have to be after given threshold
-        [Fact]
-        public void ShouldReturnNotDeletedClaimCreatedAfterGivenDateThreshold()
-        {
-            var existingClaims = new[] { 
-                new ClaimEvent
-                {
-                    Identifier = 1,
-                    Event = "Created",
-                    Source = "FakeSource",
-                    Predicate = "has name",
-                    CreatedDate = DateTime.Now
-                },
-                new ClaimEvent
-                {
-                    Identifier = 2,
-                    Event = "Deleted",
-                    Source = "FakeSource",
-                    Predicate = "has name",
-                    CreatedDate = DateTime.Now.AddSeconds(1)
-                },
-                new ClaimEvent
-                {
-                    Identifier = 3,
-                    Event = "Created",
-                    Source = "AnotherFakeSource",
-                    Predicate = "has address",
-                    CreatedDate = DateTime.Now.AddSeconds(4)
-                }
-            };
-
-            var claimRepo = new Mock<ClaimRepository>();
-            claimRepo.Setup(c => c.Query()).Returns(existingClaims.AsQueryable());
-
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,"2008-01-01");            
-
-            var result = claimFilter.Filter();
-            Assert.Single(result);
-            Assert.Equal(existingClaims[2], result.First());
-        }
-
+        // Current claim: created and not be deleted for another claim created after it, and its date have to be after given threshold      
         [Fact]
         public void ShouldAssingDateToFilterThreshold()
         {
@@ -62,14 +23,7 @@ namespace TestsRefactoring.Tests.Testsmell
         {
             var existingClaims = new[]
             {
-                new ClaimEvent
-                {
-                    Identifier = 4,
-                    Event = "Created",
-                    Source = "AnotherOneFakeSource",
-                    Predicate = "has country",
-                    CreatedDate = DateTime.Parse("2007-01-01")
-                }
+                ClaimEventBuilder.New().With(c => c.CreatedDate = DateTime.Parse("2007-01-01")).Build()
             };
             
             var claimRepo = new Mock<ClaimRepository>();
@@ -85,6 +39,7 @@ namespace TestsRefactoring.Tests.Testsmell
         {
             var existingClaims = new[]
             {
+                
                 new ClaimEvent
                 {
                     Identifier = 1,
