@@ -6,8 +6,8 @@ namespace TestsRefactoring.Library.TestSmell
     {
         public string Event { get; set; }
         public string Predicate { get; set; }
-        public DateTime Timestamp { get; set; }
+        public DateTime CreatedDate { get; set; }
         public int Identifier { get; set; }
-        public string ClaimSource { get; set; }
+        public string Source { get; set; }
     }
 }

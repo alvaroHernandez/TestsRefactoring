@@ -17,9 +17,10 @@ namespace TestsRefactoring.Library.TestSmell
 
         public List<ClaimEvent> Filter()
         {
-            var claims = _claimRepository.Query();
-            return claims.Where(c => DateTime.Compare(c.Timestamp,DateThreshold) >= 0).GroupBy(c => new { c.Predicate, c.ClaimSource})
-                .Select(group => group.OrderByDescending(c => c.Timestamp).First())
+            return _claimRepository.Query()
+                .Where(c => DateTime.Compare(c.CreatedDate,DateThreshold) >= 0)
+                .GroupBy(c => new { c.Predicate, ClaimSource = c.Source})
+                .Select(group => group.OrderByDescending(c => c.CreatedDate).First())
                 .Where(c => c.Event == "Created").ToList();
         }
     }
