@@ -38,20 +38,12 @@ namespace TestsRefactoring.Tests.Testsmell
         {
             var claim = ClaimEventBuilder.New().Build();
             var similarClaim = ClaimEventBuilder.New()
-                .With(c => c.Predicate = claim.Predicate)
-                .With(c => c.Source = claim.Source)
+                .WithSamePredicateAndSourceThan(claim)
                 .Build();
             
-            var existingClaims = new[]
-            {
-                claim,
-                similarClaim
-            };
-            
-            var claimRepo = new Mock<ClaimRepository>();
-            claimRepo.Setup(c => c.Query()).Returns(existingClaims.AsQueryable());
+            var claimRepo = Mock.Of<ClaimRepository>(c => c.Query() == new []{claim,similarClaim}.AsQueryable());
 
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,DateTime.MinValue.ToString());            
+            var claimFilter = new CurrentClaimsFilter(claimRepo,DateTime.MinValue.ToString());            
 
             var result = claimFilter.Filter();
             Assert.Single(result);            
@@ -62,23 +54,16 @@ namespace TestsRefactoring.Tests.Testsmell
         {
             var claim = ClaimEventBuilder.New().Build();
             var latestClaim = ClaimEventBuilder.New()
-                .With(c => c.Predicate = claim.Predicate)
-                .With(c => c.Source = claim.Source)
-                .With(c => c.CreatedDate = claim.CreatedDate.AddSeconds(1))
-                .Build();
-            
-            var existingClaims = new[]
-            {
-                claim,
-                latestClaim
-            };
+                .WithSamePredicateAndSourceThan(claim)
+                .WithCreatedDateLaterThan(claim).Build();
             
             var claimRepo = new Mock<ClaimRepository>();
-            claimRepo.Setup(c => c.Query()).Returns(existingClaims.Shuffle().AsQueryable());
+            claimRepo.Setup(c => c.Query()).Returns(new []{claim,latestClaim}.Shuffle().AsQueryable());
 
             var claimFilter = new CurrentClaimsFilter(claimRepo.Object,DateTime.MinValue.ToString());           
 
             var result = claimFilter.Filter();
+            
             Assert.Single(result);
             Assert.Equal(latestClaim, result.First());
         }
@@ -86,26 +71,18 @@ namespace TestsRefactoring.Tests.Testsmell
         [Fact]
         public void ShouldReturnEmptyWhenClaimWithSamePredicateAndSourceIsCreatedLaterWithDeletedEvent()
         {
-            var claim = ClaimEventBuilder.New().With(c => c.Event = "Created").Build();
-            var latestClaim = ClaimEventBuilder.New()
-                .With(c => c.Predicate = claim.Predicate)
-                .With(c => c.Source = claim.Source)
-                .With(c => c.CreatedDate = claim.CreatedDate.AddSeconds(1))
-                .With(c => c.Event = "Deleted")
+            var creationClaim = ClaimEventBuilder.NewCreatedClaimEvent().Build();
+            var deletionClaim = ClaimEventBuilder.NewDeletedClaimEvent()
+                .WithSamePredicateAndSourceThan(creationClaim)
+                .WithCreatedDateLaterThan(creationClaim)
                 .Build();
             
-            var existingClaims = new[]
-            {
-                claim,
-                latestClaim
-            };
-            
             var claimRepo = new Mock<ClaimRepository>();
-            claimRepo.Setup(c => c.Query()).Returns(existingClaims.Shuffle().AsQueryable());
+            claimRepo.Setup(c => c.Query()).Returns(new[]{creationClaim,deletionClaim}.Shuffle().AsQueryable());
 
             var claimFilter = new CurrentClaimsFilter(claimRepo.Object,DateTime.MinValue.ToString());            
-
             var result = claimFilter.Filter();
+            
             Assert.Empty(result);   
         }
     }
