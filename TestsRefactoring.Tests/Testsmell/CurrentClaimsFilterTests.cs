@@ -22,13 +22,11 @@ namespace TestsRefactoring.Tests.Testsmell
         [Fact]
         public void ShouldReturnEmptyWhenClaimIsBeforeGivenDateThreshold()
         {
-            var ignoredClaim = ClaimEventBuilder.New().Build();
+            var ignoredClaim = ClaimEventBuilder.New().Build();            
+            var claimRepo = CreateClaimRepositoryWithStubbedClaims(new []{ignoredClaim});
             
-            var claimRepo = new Mock<ClaimRepository>();
-            claimRepo.Setup(c => c.Query()).Returns(new []{ignoredClaim}.AsQueryable());
-
             var dateThreshold = ignoredClaim.CreatedDate.AddDays(1).ToString();
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,dateThreshold);            
+            var claimFilter = new CurrentClaimsFilter(claimRepo,dateThreshold);            
 
             Assert.Empty(claimFilter.Filter());
         }
@@ -41,11 +39,11 @@ namespace TestsRefactoring.Tests.Testsmell
                 .WithSamePredicateAndSourceThan(claim)
                 .Build();
             
-            var claimRepo = Mock.Of<ClaimRepository>(c => c.Query() == new []{claim,similarClaim}.AsQueryable());
-
-            var claimFilter = new CurrentClaimsFilter(claimRepo,DateTime.MinValue.ToString());            
+            var claimRepo = CreateClaimRepositoryWithStubbedClaims(new []{claim,similarClaim});
+            var claimFilter = CreateCurrentClaimFilterWithRepository(claimRepo);            
 
             var result = claimFilter.Filter();
+            
             Assert.Single(result);            
         }
 
@@ -57,10 +55,9 @@ namespace TestsRefactoring.Tests.Testsmell
                 .WithSamePredicateAndSourceThan(claim)
                 .WithCreatedDateLaterThan(claim).Build();
             
-            var claimRepo = new Mock<ClaimRepository>();
-            claimRepo.Setup(c => c.Query()).Returns(new []{claim,latestClaim}.Shuffle().AsQueryable());
+            var claimRepo = CreateClaimRepositoryWithStubbedClaims(new []{claim,latestClaim});
 
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,DateTime.MinValue.ToString());           
+            var claimFilter = new CurrentClaimsFilter(claimRepo,DateTime.MinValue.ToString());           
 
             var result = claimFilter.Filter();
             
@@ -77,13 +74,24 @@ namespace TestsRefactoring.Tests.Testsmell
                 .WithCreatedDateLaterThan(creationClaim)
                 .Build();
             
-            var claimRepo = new Mock<ClaimRepository>();
-            claimRepo.Setup(c => c.Query()).Returns(new[]{creationClaim,deletionClaim}.Shuffle().AsQueryable());
-
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,DateTime.MinValue.ToString());            
+            var claimRepo = CreateClaimRepositoryWithStubbedClaims(new []{creationClaim, deletionClaim});
+            var claimFilter = CreateCurrentClaimFilterWithRepository(claimRepo);               
+            
             var result = claimFilter.Filter();
             
             Assert.Empty(result);   
+        }
+        
+        private CurrentClaimsFilter CreateCurrentClaimFilterWithRepository(ClaimRepository claimsRepository)
+        {
+            return new CurrentClaimsFilter(claimsRepository, DateTime.MinValue.ToString());
+        }
+
+        private static ClaimRepository CreateClaimRepositoryWithStubbedClaims(ClaimEvent[] stubbedClaims)
+        {
+            var claimRepo = new Mock<ClaimRepository>();
+            claimRepo.Setup(c => c.Query()).Returns(stubbedClaims.Shuffle().AsQueryable());
+            return claimRepo.Object;
         }
     }
 }
