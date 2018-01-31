@@ -51,8 +51,7 @@ namespace TestsRefactoring.Tests.Testsmell
             var claimRepo = new Mock<ClaimRepository>();
             claimRepo.Setup(c => c.Query()).Returns(existingClaims.AsQueryable());
 
-            var dateThreshold = claim.CreatedDate.AddDays(-1).ToString();
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,dateThreshold);            
+            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,DateTime.MinValue.ToString());            
 
             var result = claimFilter.Filter();
             Assert.Single(result);            
@@ -77,8 +76,7 @@ namespace TestsRefactoring.Tests.Testsmell
             var claimRepo = new Mock<ClaimRepository>();
             claimRepo.Setup(c => c.Query()).Returns(existingClaims.Shuffle().AsQueryable());
 
-            var dateThreshold = claim.CreatedDate.AddDays(-1).ToString();
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,dateThreshold);           
+            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,DateTime.MinValue.ToString());           
 
             var result = claimFilter.Filter();
             Assert.Single(result);
@@ -105,8 +103,7 @@ namespace TestsRefactoring.Tests.Testsmell
             var claimRepo = new Mock<ClaimRepository>();
             claimRepo.Setup(c => c.Query()).Returns(existingClaims.Shuffle().AsQueryable());
 
-            var dateThreshold = claim.CreatedDate.AddDays(-1).ToString();
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,dateThreshold);            
+            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,DateTime.MinValue.ToString());            
 
             var result = claimFilter.Filter();
             Assert.Empty(result);   
