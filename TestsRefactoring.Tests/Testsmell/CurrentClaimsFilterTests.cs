@@ -15,22 +15,20 @@ namespace TestsRefactoring.Tests.Testsmell
         [Fact]
         public void ShouldAssingDateToFilterThreshold()
         {
-            var claimFilter = new CurrentClaimsFilter(null,"2008-01-01");
-            Assert.Equal(claimFilter.DateThreshold,DateTime.Parse("2008-01-01"));
+            var claimFilter = new CurrentClaimsFilter(null,DateTime.Today.ToString());
+            Assert.Equal(claimFilter.DateThreshold,DateTime.Today);
         }
 
         [Fact]
         public void ShouldReturnEmptyWhenClaimIsBeforeGivenDateThreshold()
         {
-            var existingClaims = new[]
-            {
-                ClaimEventBuilder.New().With(c => c.CreatedDate = DateTime.Parse("2007-01-01")).Build()
-            };
+            var ignoredClaim = ClaimEventBuilder.New().Build();
             
             var claimRepo = new Mock<ClaimRepository>();
-            claimRepo.Setup(c => c.Query()).Returns(existingClaims.AsQueryable());
+            claimRepo.Setup(c => c.Query()).Returns(new []{ignoredClaim}.AsQueryable());
 
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,"2008-01-01");            
+            var dateThreshold = ignoredClaim.CreatedDate.AddDays(1).ToString();
+            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,dateThreshold);            
 
             Assert.Empty(claimFilter.Filter());
         }
@@ -53,7 +51,8 @@ namespace TestsRefactoring.Tests.Testsmell
             var claimRepo = new Mock<ClaimRepository>();
             claimRepo.Setup(c => c.Query()).Returns(existingClaims.AsQueryable());
 
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,"2008-01-01");            
+            var dateThreshold = claim.CreatedDate.AddDays(-1).ToString();
+            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,dateThreshold);            
 
             var result = claimFilter.Filter();
             Assert.Single(result);            
@@ -78,7 +77,8 @@ namespace TestsRefactoring.Tests.Testsmell
             var claimRepo = new Mock<ClaimRepository>();
             claimRepo.Setup(c => c.Query()).Returns(existingClaims.Shuffle().AsQueryable());
 
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,"2008-01-01");            
+            var dateThreshold = claim.CreatedDate.AddDays(-1).ToString();
+            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,dateThreshold);           
 
             var result = claimFilter.Filter();
             Assert.Single(result);
@@ -105,7 +105,8 @@ namespace TestsRefactoring.Tests.Testsmell
             var claimRepo = new Mock<ClaimRepository>();
             claimRepo.Setup(c => c.Query()).Returns(existingClaims.Shuffle().AsQueryable());
 
-            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,"2008-01-01");            
+            var dateThreshold = claim.CreatedDate.AddDays(-1).ToString();
+            var claimFilter = new CurrentClaimsFilter(claimRepo.Object,dateThreshold);            
 
             var result = claimFilter.Filter();
             Assert.Empty(result);   
