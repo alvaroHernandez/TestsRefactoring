@@ -37,26 +37,18 @@ namespace TestsRefactoring.Tests.Testsmell
         [Fact]
         public void ShouldReturnClaimsWithSamePredicateAndSourceAsOneClaim()
         {
+            var claim = ClaimEventBuilder.New().Build();
+            var similarClaim = ClaimEventBuilder.New()
+                .With(c => c.Predicate = claim.Predicate)
+                .With(c => c.Source = claim.Source)
+                .Build();
+            
             var existingClaims = new[]
             {
-                
-                new ClaimEvent
-                {
-                    Identifier = 1,
-                    Event = "Created",
-                    Source = "FakeSource",
-                    Predicate = "has name",
-                    CreatedDate = DateTime.Now
-                },
-                new ClaimEvent
-                {
-                    Identifier = 2,
-                    Event = "Created",
-                    Source = "FakeSource",
-                    Predicate = "has name",
-                    CreatedDate = DateTime.Now.AddSeconds(1)
-                }
+                claim,
+                similarClaim
             };
+            
             var claimRepo = new Mock<ClaimRepository>();
             claimRepo.Setup(c => c.Query()).Returns(existingClaims.AsQueryable());
 

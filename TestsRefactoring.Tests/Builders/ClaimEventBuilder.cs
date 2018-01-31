@@ -9,11 +9,16 @@ namespace TestsRefactoring.Tests.Builders
         {
             var random = new Random();
             this
-            .With(c => c.Event = Guid.NewGuid().ToString())
+            .With(c => c.Event = GenerateRandomValidEvent(random))
             .With(c => c.Identifier = random.Next())
             .With(c => c.Source = Guid.NewGuid().ToString())
             .With(c => c.CreatedDate = DateTime.Now)
             .With(c => c.Predicate = Guid.NewGuid().ToString());
+        }
+        
+        private static string GenerateRandomValidEvent(Random random)
+        {
+            return random.Next(0, 2) > 0 ? ClaimEvent.CreatedEvent : ClaimEvent.DeletedEvent;
         }
 
         public static ClaimEventBuilder New()
