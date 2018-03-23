@@ -5,7 +5,7 @@ namespace TestsRefactoring.Library.TestSmell
     public class ClaimEvent
     {
         public const string CreatedEvent = "Created";
-        public const string DeletedEvent = "Created";
+        public const string DeletedEvent = "Deleted";
         
         public string Event { get; set; }
         public string Predicate { get; set; }

@@ -25,29 +25,31 @@ namespace TestsRefactoring.Tests.Builders
         {
             return new ClaimEventBuilder();
         }
+
+        public static ClaimEventBuilder NewCreatedClaimEvent()
+        {
+            return (ClaimEventBuilder)New().With(c => c.Event = "Created");
+        }
+
+        public static ClaimEventBuilder NewDeletedClaimEvent()
+        {
+            return (ClaimEventBuilder)New().With(c => c.Event = "Deleted");
+        }
         
         public ClaimEventBuilder WithSamePredicateAndSourceThan(ClaimEvent claim)
         {
             return (ClaimEventBuilder)  
-                With(c => c.Predicate = claim.Predicate)
+                this.With(c => c.Predicate = claim.Predicate)
                     .With(c => c.Source = claim.Source);
         }
         
         public ClaimEventBuilder WithCreatedDateLaterThan(ClaimEvent claim)
         {
             return (ClaimEventBuilder)  
-                With(c => c.Predicate = claim.Predicate)
+                this.With(c => c.Predicate = claim.Predicate)
                     .With(c => c.CreatedDate = claim.CreatedDate.AddSeconds(1));
         }
 
-        public static ClaimEventBuilder NewCreatedClaimEvent()
-        {
-            return (ClaimEventBuilder) New().With(c => c.Event = "Created");
-        }
-        
-        public static ClaimEventBuilder NewDeletedClaimEvent()
-        {
-            return (ClaimEventBuilder) New().With(c => c.Event = "Deleted");
-        }
+
     }
 }

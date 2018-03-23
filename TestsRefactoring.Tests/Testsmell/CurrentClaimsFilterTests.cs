@@ -34,8 +34,8 @@ namespace TestsRefactoring.Tests.Testsmell
         [Fact]
         public void ShouldReturnClaimsWithSamePredicateAndSourceAsOneClaim()
         {
-            var claim = ClaimEventBuilder.New().Build();
-            var similarClaim = ClaimEventBuilder.New()
+            var claim = ClaimEventBuilder.NewCreatedClaimEvent().Build();
+            var similarClaim = ClaimEventBuilder.NewCreatedClaimEvent()
                 .WithSamePredicateAndSourceThan(claim)
                 .Build();
             
